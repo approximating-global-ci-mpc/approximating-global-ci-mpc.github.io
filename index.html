@@ -158,7 +158,7 @@
             <br>
             <!-- Publication and presentation announcement -->
             <h2>Accepted to Robotics and Automation Letters (RA-L) in 2025</h2>
-            <h2>To be presented at ICRA 2026 in Vienna, Austria</h2>
+            <h2>Presented at ICRA 2026 in Vienna, Austria</h2>
 
             <br>
             <br>
@@ -230,6 +230,7 @@
                     </video>
                 </div>
 
+                <br>
                 <h2>Tight tolerances:  2cm, 0.1rad (5.7 degrees)</h2>
                 <nav>
                     <div class="carousel-slider-wrapper">
@@ -479,77 +480,109 @@
                     </tr>
                     <tbody>
                       <tr>
-                        <td>Hardware SE(3) Jack (Ours)<br>67 trials</td>
+                        <td>Hardware SE(3) Jack (Ours)<br>67 success (0 HWV), 0 fail</td>
                         <td>109.20 &plusmn; 64.24<br>[17.40, 292.07]</td>
                         <td>84.86 &plusmn; 60.54<br>[5.20, 257.74]</td>
                       </tr>
                       <tr>
-                        <td>Simulation SE(3) Jack (Ours)<br>26 trials</td>
+                        <td>Simulation SE(3) Jack (Ours)<br>26 success (0 HWV), 0 fail</td>
                         <td>49.31 &plusmn; 30.35<br>[9.71, 124.70]</td>
                         <td>33.84 &plusmn; 26.39<br>[7.97, 97.82]</td>
                       </tr>
                       <tr>
-                        <td>Simulation SE(3) Jack (MJPC)<br>34 trials</td>
+                        <td>Simulation SE(3) Jack (Naive-R)<br>32 success (0 HWV), 18 fail</td>
+                        <td>182.34 &plusmn; 84.66<br>[63.52, 352.75]</td>
+                        <td>138.17 &plusmn; 78.89<br>[18.64, 297.00]</td>
+                      </tr>
+                      <tr>
+                        <td>Simulation SE(3) Jack (Naive-B)<br>3 success (0 HWV), 17 fail</td>
+                        <td>140.86 &plusmn; 121.46<br>[18.55, 306.47]</td>
+                        <td>49.67 &plusmn; 32.25<br>[17.69, 93.82]</td>
+                      </tr>
+                      <tr>
+                        <td>Simulation SE(3) Jack (MJPC)<br>34 success (25 HWV), 0 fail</td>
                         <td>107.91 &plusmn; 112.38<br>[3.30, 567.69]</td>
                         <td>68.00 &plusmn; 83.50<br>[1.51, 343.79]</td>
                       </tr>
                       <tr>
-                        <td>Hardware SE(2) Push-T (Ours)<br>106 trials</td>
+                        <td>Hardware SE(2) Push-T (Ours)<br>106 success (0 HWV), 0 fail</td>
                         <td>30.45 &plusmn; 13.11<br>[7.50, 79.43]</td>
                         <td>17.43 &plusmn; 7.59<br>[3.86, 42.00]</td>
                       </tr>
                     </tbody>
                 </table>
-
-                <!-- <p class="paragraph">
-                    Our controller, unsurprisingly, achieves pose goals faster
-                    in simulation than on hardware (see 49.31s simulation
-                    average compared to 109.20s hardware average in the above
-                    table).  This gap, common in the literature, can be partly
-                    explained by state estimate errors, incorrect models, and
-                    FoundationPose's added computational load.  We reiterate our
-                    approach is not optimal; it is a real-time CI-MPC approach
-                    that makes all its decisions on-the-fly.  While not optimal,
-                    our controller is demonstrably effective on these difficult
-                    tasks.
-                </p> -->
+                <p class="paragraph">
+                    We present hardware results on 3D SE(3) jack and planar
+                    push-T tasks for our controller and other comparisons
+                    (described below).  The above table shows time-to-goal
+                    statistics as well as numbers of successful and failed
+                    trials.  In some of its successful (meaning the object
+                    reached its goal) trials, the MJPC baseline exhibited Franka
+                    hardware limit violations (HWV), meaning joint velocity,
+                    joint torque, or workspace limits were violated. We report
+                    HWV numbers as well, showing our controller and its
+                    ablations (Naive-R and Naive-B) always satisfied these
+                    safety constraints.
+                </p>
             </div>
 
             <br>
 
-            <!-- MJPC Comparison -->
+            <!-- Comparisons -->
             <div class="base-row add-top-padding">
-                <h1 id="abstract">Comparison to MuJoCo MPC (MJPC)</h1>
+                <h1 id="abstract">Comparisons</h1>
                 <p class="paragraph">
-                    Due to the inability to escape geometric local minima, C3
-                    fails essentially 100% of the time on our tasks and thus is
-                    not compared.  We compare with
-                    <a href="https://arxiv.org/abs/2212.00541">MuJoCo MPC (MJPC)
-                    with predictive sampling</a> on the 3D jack task in
-                    simulation.
+                    In simulation, we compare against:
                 </p>
+                <ul class="paragraph paragraph-list">
+                    <li><b><a href="https://arxiv.org/abs/2212.00541">
+                        MuJoCo MPC (MJPC) with predictive sampling</a></b>:  A
+                        non-local CI-MPC approach that relies on sampling many
+                        input trajectories in parallel and executing the one
+                        that predicts making the most progress.  This is
+                        a gradient-free approximation to the global CI-MPC,
+                        while our approach mixes gradient-free sampling with
+                        gradient-based optimization to achieve the best local
+                        plan to each sample.
+                    </li>
+                    <li><b>Naive-R</b>:  An ablated version of our
+                        controller that randomly selects an end effector
+                        sample upon contact-rich-to-free transitions,
+                        instead of using the predicted MPC cost to select
+                        samples.
+                    </li>
+                    <li><b>Naive-B</b>:  An ablated version of our
+                        controller that always selects the end effector
+                        location behind the object with respect to the goal
+                        upon contact-rich-to-free transitions.
+                    </li>
+                    <li><b>Not compared: C3</b>:  Due to the inability to escape
+                    geometric local minima, C3 fails essentially 100% of the
+                    time on our tasks.
+                    </li>
+                </ul>
 
                 <div class="columns is-centered">
                     <img id="smaller-img"
-                        src="./static/images/mjpc_cdf_concise.png" />
+                        src="./static/images/mjpc_cdf_concise.pdf" />
                 </div>
                 <div class="columns is-centered">
                     <img id="smaller-img"
-                        src="./static/images/mjpc_hwv.png" />
+                        src="./static/images/mjpc_hwv_frac.pdf" />
                 </div>
                 <p class="paragraph">
-                    Our controller outperforms MJPC in simulation on our 3D jack
-                    example. Further, our controller satisfies Franka hardware
+                    Our controller is demonstrably effective on difficult tasks
+                    and outperforms MJPC and our ablations in simulation on our
+                    3D jack example.  Further, our controller and its ablation
+                    variants (Naive-R and Naive-B) satisfy Franka hardware
                     limits (joint velocity/torque, workspace limits), while MJPC
-                    nearly always violates at least one.  Given this high
-                    hardware limit violation rate, we did not feel safe
-                    deploying MJPC on the real robot.  While impossible to
-                    compare against all possible MJPC weights, we put forth a
-                    best-faith effort in tuning and further investigated the
-                    role of end effector velocity cost weight, due to its role
-                    in the controller's speed.  Increasing this cost weight
-                    makes MJPC less performant, yet does not prevent hardware
-                    limit violations.
+                    nearly always violates at least one.  Given this high hardware
+                    limit violation (HWV) rate, we did not feel safe deploying MJPC
+                    on the real robot.  While impossible to compare against all
+                    possible MJPC weights, we investigate the role of end effector
+                    velocity cost weight, due to its role in the controller's speed.
+                    Increasing this cost weight makes MJPC less performant, yet does
+                    not prevent HWV.
                 </p>
             </div>
 
@@ -576,12 +609,63 @@
 &nbsp;title={Approximating Global Contact-Implicit MPC via Sampling and Local Complementarity},
 &nbsp;author={Sharanya Venkatesh* and Bibit Bianchini* and Alp Aydinoglu and William Yang and Michael Posa},
 &nbsp;year={2025},
+&nbsp;month={September},
 &nbsp;journal={IEEE Robotics and Automation Letters},
 &nbsp;publisher={IEEE},
-&nbsp;arxiv={2505.13350},
-&nbsp;website={https://approximating-global-ci-mpc.github.io/}
+&nbsp;volume={10},
+&nbsp;number={11},
+&nbsp;pages={12117--12124},
+&nbsp;url={https://approximating-global-ci-mpc.github.io/},
+&nbsp;doi={10.1109/LRA.2025.3615030},
+&nbsp;arxiv={arXiv:2505.13350},
 }
 </pre>
+            </div>
+
+            <br>
+
+            <!-- Related work -->
+            <div class="base-row add-top-padding">
+                <h1 id="abstract">Related Work</h1>
+
+                <div class="lineage-diagram" aria-label="Related work lineage">
+                    <a class="lineage-node"
+                        href="https://ieeexplore.ieee.org/document/10614849"
+                        target="_blank" rel="noopener">
+                        <span class="lineage-title">Consensus Complementarity
+                            Control (C3)
+                        </span>
+                        <span class="lineage-subtitle">
+                            Introduced a new local contact-implicit MPC method.
+                        </span>
+                        <span class="lineage-venue">TRO 2024</span>
+                    </a>
+                    <div class="lineage-arrow" aria-hidden="true"></div>
+                    <div class="lineage-node lineage-node-current">
+                        <span class="lineage-title">
+                            This work
+                        </span>
+                        <span class="lineage-subtitle">
+                            Integrated C3 into a globally-capable control
+                            architecture via sampling and switching between
+                            contact-rich and contact-free modes.
+                        </span>
+                        <span class="lineage-venue">RA-L 2025</span>
+                    </div>
+                    <div class="lineage-arrow" aria-hidden="true"></div>
+                    <a class="lineage-node"
+                        href="https://dairlab.github.io/push-anything/"
+                        target="_blank" rel="noopener">
+                        <span class="lineage-title">Push Anything</span>
+                        <span class="lineage-subtitle">
+                            Introduced C3+, a substantially faster version of C3
+                            that, used with our sampling-based architecture, can
+                            do single- and multi-object pushing of arbitrarily
+                            complex geometries.
+                        </span>
+                        <span class="lineage-venue">ICRA 2026</span>
+                    </a>
+                </div>
             </div>
 
             </div>
