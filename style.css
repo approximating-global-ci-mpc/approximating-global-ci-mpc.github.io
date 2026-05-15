@@ -71,6 +71,8 @@ th {
     line-height: 65px;
     font-weight: 700;
     letter-spacing: 4;
+    overflow-wrap: anywhere;
+    word-break: normal;
 }
 
 .title-mobile {
@@ -943,6 +945,11 @@ iframe:not(.show) {
 }
 
 @media screen and (max-width: 750px) {
+    .title {
+        font-size: 38px;
+        line-height: 48px;
+    }
+
     .gpt-query {
         height: 30px;
         font-size: 2.5vw;
@@ -979,6 +986,16 @@ iframe:not(.show) {
 }
 
 @media screen and (max-width: 550px) {
+    .section {
+        margin-left: 16px;
+        margin-right: 16px;
+    }
+
+    .title {
+        font-size: 30px;
+        line-height: 38px;
+    }
+
     .subheader {
         font-size: 16px;
     }
